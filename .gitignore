@@ -1,0 +1,19 @@
+# Dataset
+data/raw/
+data/processed/
+
+# Imágenes
+*.jpg
+*.jpeg
+*.png
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Entornos virtuales
+venv/
+.env/

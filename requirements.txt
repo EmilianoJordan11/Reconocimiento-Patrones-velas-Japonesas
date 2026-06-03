@@ -1,0 +1,11 @@
+roboflow
+pandas
+numpy
+matplotlib
+jupyter
+pyyaml
+torch
+torchvision
+Pillow
+opencv-python
+tqdm

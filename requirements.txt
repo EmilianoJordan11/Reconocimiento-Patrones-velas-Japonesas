@@ -9,3 +9,5 @@ torchvision
 Pillow
 opencv-python
 tqdm
+ultralytics
+seaborn

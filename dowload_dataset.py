@@ -17,9 +17,10 @@ import os
 import shutil
 from roboflow import Roboflow
 
-# Inicializamos el cliente de Roboflow con la API key del workspace.
-# NOTA: idealmente esta key debería venir de una variable de entorno y no estar hardcodeada.
-rf = Roboflow(api_key="2HWZKz4mE7I0TJUj4Aea")
+# La API key puede configurarse con la variable de entorno ROBOFLOW_API_KEY.
+# Si no está definida, se usa el valor por defecto del proyecto.
+api_key = os.getenv("ROBOFLOW_API_KEY", "2HWZKz4mE7I0TJUj4Aea")
+rf = Roboflow(api_key=api_key)
 
 # Navegamos hasta el proyecto específico dentro del workspace de Roboflow.
 project = rf.workspace("madhumitha-jc-hvsdd").project("candlestick-pattern")

@@ -9,3 +9,4 @@ torchvision
 Pillow
 opencv-python
 tqdm
+torchmetrics[detection]>=1.0

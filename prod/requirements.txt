@@ -1,0 +1,18 @@
+# Dependencias de la app de inferencia (prod/).
+# Versiones FIJADAS a las probadas localmente (Python 3.11).
+#
+# NOTA SOBRE TORCH / GPU vs CPU:
+#   Estas versiones de torch/torchvision son las de desarrollo (build CUDA cu128).
+#   Para desplegar en un hosting SIN GPU (p. ej. Streamlit Cloud), reemplazá las
+#   dos líneas de torch por sus equivalentes CPU, por ejemplo:
+#       --extra-index-url https://download.pytorch.org/whl/cpu
+#       torch==2.11.0
+#       torchvision==0.26.0
+#   (la app detecta automáticamente CPU/GPU en tiempo de ejecución).
+
+streamlit==1.58.0
+torch==2.11.0
+torchvision==0.26.0
+pillow==12.2.0
+pandas==3.0.3
+numpy==2.4.4

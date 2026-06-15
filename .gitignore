@@ -29,3 +29,6 @@ TP_Integrador_2026.pdf
 # El modelo versionado vive en dev/modelo.pth (Git LFS); este es solo el caché local.
 prod/modelo.pth
 prod/*.part
+
+# Secrets de Streamlit (NO versionar el real; sí se versiona el .example).
+.streamlit/secrets.toml

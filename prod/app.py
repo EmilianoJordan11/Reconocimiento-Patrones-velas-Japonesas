@@ -32,6 +32,74 @@ st.set_page_config(
 
 
 # --------------------------------------------------------------------------- #
+# Texto interpretativo por patrón (CONTENIDO ESTÁTICO, no sale del modelo)
+# --------------------------------------------------------------------------- #
+# Diccionario fijo {nombre_patrón: descripción educativa}. El modelo solo DETECTA
+# el patrón; estas descripciones son estáticas, neutrales y con fines educativos.
+# Las claves coinciden EXACTAMENTE con utils.CLASS_NAMES.
+#
+# Reglas de contenido aplicadas:
+#   - No son pronósticos ni consejos de inversión.
+#   - Redactadas en condicional ("suele asociarse a", "podría indicar"…).
+#   - Siempre acompañadas del disclaimer DISCLAIMER_TEXT.
+PATTERN_INFO = {
+    "Bearish Engulfing": (
+        "El patrón **Bearish Engulfing** (envolvente bajista) está formado por dos "
+        "velas: una alcista pequeña seguida de una vela bajista cuyo cuerpo "
+        "*envuelve* por completo al cuerpo de la anterior. En análisis técnico "
+        "**suele interpretarse** como una posible señal de agotamiento de un "
+        "movimiento alcista previo. Históricamente **se asocia con** un cambio en "
+        "el equilibrio entre compradores y vendedores a favor de estos últimos."
+    ),
+    "Bearish Insidebar": (
+        "El patrón **Bearish Inside Bar** (barra interior bajista) aparece cuando "
+        "una vela queda contenida dentro del rango (máximo–mínimo) de la vela "
+        "anterior, en un contexto bajista. **Podría indicar** una pausa o "
+        "consolidación tras un movimiento descendente. **Suele interpretarse** "
+        "como una fase de indecisión o acumulación de volatilidad antes de que el "
+        "precio defina su próxima dirección."
+    ),
+    "Bullish Engulfing": (
+        "El patrón **Bullish Engulfing** (envolvente alcista) está formado por una "
+        "vela bajista pequeña seguida de una vela alcista cuyo cuerpo *envuelve* "
+        "por completo al de la anterior. **Históricamente se interpreta como** una "
+        "posible señal de agotamiento de un movimiento bajista previo y **suele "
+        "asociarse a** un cambio en el equilibrio entre vendedores y compradores a "
+        "favor de estos últimos."
+    ),
+    "Bullish Insidebar": (
+        "El patrón **Bullish Inside Bar** (barra interior alcista) ocurre cuando "
+        "una vela queda contenida dentro del rango de la vela anterior, en un "
+        "contexto alcista. **Podría indicar** una pausa o consolidación dentro de "
+        "un movimiento ascendente. **Suele interpretarse** como una fase de "
+        "indecisión previa a la definición de la siguiente dirección del precio."
+    ),
+    "Hammer": (
+        "El patrón **Hammer** (martillo) es una vela con un cuerpo pequeño en la "
+        "parte superior y una mecha inferior larga, que aparece tras un movimiento "
+        "descendente. **Suele interpretarse** como un posible rechazo de los "
+        "precios bajos durante la sesión. Históricamente **se asocia con** una "
+        "posible pérdida de fuerza del movimiento bajista, aunque por sí solo no "
+        "confirma nada."
+    ),
+    "Inverted_Hammer": (
+        "El patrón **Inverted Hammer** (martillo invertido) presenta un cuerpo "
+        "pequeño en la parte inferior y una mecha superior larga, apareciendo tras "
+        "un movimiento descendente. **Podría indicar** un intento de los "
+        "compradores por empujar el precio al alza durante la sesión. **Suele "
+        "interpretarse** como una posible señal de cautela sobre la continuidad de "
+        "la tendencia bajista, normalmente a la espera de confirmación posterior."
+    ),
+}
+
+# Disclaimer obligatorio, siempre visible junto al texto interpretativo.
+DISCLAIMER_TEXT = (
+    "ℹ️ **Información educativa sobre análisis técnico. No es recomendación de "
+    "inversión. Los patrones no garantizan resultados.**"
+)
+
+
+# --------------------------------------------------------------------------- #
 # Estilos (CSS custom) — solo presentación
 # --------------------------------------------------------------------------- #
 def inject_css() -> None:
@@ -227,11 +295,20 @@ if result["top"] is not None:
         )
     with c2:
         st.metric("Confianza", f"{top['score']:.1%}")
+
+    # --- Texto interpretativo (estático) del patrón principal ----------------
+    info = PATTERN_INFO.get(top["class_name"])
+    if info:
+        st.markdown(f"**¿Qué significa «{top['class_name']}»?**")
+        st.markdown(info)
 else:
     st.warning(
         "No se detectó ningún patrón por encima del umbral seleccionado "
         f"({score_threshold:.0%}). Probá bajar el umbral en la barra lateral."
     )
+
+# Disclaimer SIEMPRE visible tras analizar una imagen (haya o no detección).
+st.info(DISCLAIMER_TEXT)
 
 # --- Tabla de detecciones con barra de confianza ----------------------------
 if detections:

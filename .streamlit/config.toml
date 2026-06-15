@@ -1,0 +1,28 @@
+# Tema de la app de inferencia (Semana 4).
+# Theming nativo de Streamlit: tema claro, prolijo, con un color de acento sobrio.
+# Las opciones aquí son las estables y ampliamente soportadas; los detalles finos
+# (tarjetas, leyenda, barras) se afinan con CSS en prod/app.py.
+
+[theme]
+# Tema base claro.
+base = "light"
+
+# Color de acento: índigo sobrio, asociable a datos/finanzas sin ser estridente.
+primaryColor = "#4F46E5"
+
+# Fondos: app casi blanca y un gris muy claro para paneles/tarjetas.
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F6FB"
+
+# Texto principal: gris azulado oscuro (mejor legibilidad que negro puro).
+textColor = "#1E293B"
+
+# Tipografía sans-serif moderna.
+font = "sans serif"
+
+# Bordes levemente redondeados para una estética prolija y actual.
+baseRadius = "0.6rem"
+
+[server]
+# Evita recolección de estadísticas de uso en desarrollo.
+headless = true

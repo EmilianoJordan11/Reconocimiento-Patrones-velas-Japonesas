@@ -55,6 +55,8 @@ con su nivel de confianza. Ver [`prod/README.md`](prod/README.md) para detalles.
 │   ├── utils.py                       # Carga de modelo + preprocesamiento + inferencia
 │   ├── requirements.txt               # Dependencias fijadas
 │   └── README.md                      # Documentación de la app
+├── .streamlit/
+│   └── config.toml                    # Tema de la app (light, color de acento, layout)
 ├── dowload_dataset.py                 # Descarga del dataset desde Roboflow
 ├── requirements.txt                   # Dependencias del entorno de desarrollo
 ├── planning.md                        # Plan de implementación

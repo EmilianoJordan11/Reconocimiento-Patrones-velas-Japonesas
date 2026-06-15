@@ -1,4 +1,4 @@
-# Dataset
+# Dataset (no se versionan imágenes ni datos pesados)
 data/raw/
 data/processed/
 
@@ -17,3 +17,15 @@ __pycache__/
 # Entornos virtuales
 venv/
 .env/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Documentos / consignas que no se versionan
+TP_Integrador_2026.pdf
+
+# Caché de descarga del modelo en producción (se baja desde MODEL_URL en runtime).
+# El modelo versionado vive en dev/modelo.pth (Git LFS); este es solo el caché local.
+prod/modelo.pth
+prod/*.part

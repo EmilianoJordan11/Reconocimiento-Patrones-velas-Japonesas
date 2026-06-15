@@ -2,10 +2,14 @@
 data/raw/
 data/processed/
 
-# Imágenes
+# Imágenes (del dataset; no se versionan)
 *.jpg
 *.jpeg
 *.png
+
+# Excepción: los assets de la app SÍ se versionan (logo, etc.), necesarios en deploy.
+!prod/assets/
+!prod/assets/**
 
 # Python
 __pycache__/

@@ -16,4 +16,4 @@ torchvision==0.26.0
 pillow==12.2.0
 pandas==3.0.3
 numpy==2.4.4
-opencv-python-headless==4.13.0
+opencv-python-headless==4.13.92

@@ -142,10 +142,21 @@ def _ensure_model_file() -> Path:
     return cache_path
 
 
-def _download_file(url: str, dest: Path) -> None:
-    """Descarga un archivo mostrando progreso en la UI de Streamlit si está."""
-    import urllib.request
+def _is_gdrive_url(url: str) -> bool:
+    """True si la URL apunta a Google Drive (necesita gdown, no urllib)."""
+    return "drive.google.com" in url or "docs.google.com" in url
 
+
+def _download_file(url: str, dest: Path) -> None:
+    """
+    Descarga un archivo a `dest`, mostrando progreso en la UI de Streamlit.
+
+    Para Google Drive se usa gdown, porque los archivos grandes (>100 MB)
+    devuelven una página HTML de confirmación de antivirus que urllib bajaría
+    como si fuese el binario, corrompiendo el modelo. gdown sortea ese paso.
+    Para cualquier otra URL de descarga directa se usa urllib con barra de
+    progreso.
+    """
     dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(dest.suffix + ".part")
 
@@ -155,12 +166,38 @@ def _download_file(url: str, dest: Path) -> None:
     except Exception:
         pass  # fuera de Streamlit, sin barra de progreso
 
-    def _hook(block_num, block_size, total_size):
-        if progress is not None and total_size > 0:
-            frac = min(1.0, (block_num * block_size) / total_size)
-            progress.progress(frac, text=f"Descargando el modelo... {frac:6.1%}")
+    if _is_gdrive_url(url):
+        # gdown no expone un hook de progreso fino; mostramos un estado
+        # indeterminado y dejamos que imprima su propio progreso en logs.
+        import gdown
 
-    urllib.request.urlretrieve(url, tmp, reporthook=_hook)
+        if progress is not None:
+            progress.progress(0.05, text="Descargando el modelo desde Google Drive...")
+        # fuzzy=True permite pasar el link de "compartir" completo, no solo el id.
+        gdown.download(url, str(tmp), quiet=False, fuzzy=True)
+    else:
+        import urllib.request
+
+        def _hook(block_num, block_size, total_size):
+            if progress is not None and total_size > 0:
+                frac = min(1.0, (block_num * block_size) / total_size)
+                progress.progress(frac, text=f"Descargando el modelo... {frac:6.1%}")
+
+        urllib.request.urlretrieve(url, tmp, reporthook=_hook)
+
+    # Sanidad: si la descarga falló silenciosamente (p. ej. Drive devolvió un
+    # HTML de error), el archivo será diminuto. Evitamos cachear basura.
+    if not tmp.exists() or tmp.stat().st_size < 1_000_000:
+        if tmp.exists():
+            tmp.unlink()
+        if progress is not None:
+            progress.empty()
+        raise RuntimeError(
+            "La descarga del modelo falló o devolvió un archivo inválido "
+            f"(<1 MB). Verificá que MODEL_URL sea un enlace de descarga válido "
+            f"y que el archivo esté compartido públicamente.\nURL: {url}"
+        )
+
     tmp.replace(dest)
     if progress is not None:
         progress.empty()

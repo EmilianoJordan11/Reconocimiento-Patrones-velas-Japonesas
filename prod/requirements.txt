@@ -1,14 +1,13 @@
 # Dependencias de la app de inferencia (prod/).
 # Versiones FIJADAS a las probadas localmente (Python 3.11).
 #
-# NOTA SOBRE TORCH / GPU vs CPU:
-#   Estas versiones de torch/torchvision son las de desarrollo (build CUDA cu128).
-#   Para desplegar en un hosting SIN GPU (p. ej. Streamlit Cloud), reemplazá las
-#   dos líneas de torch por sus equivalentes CPU, por ejemplo:
-#       --extra-index-url https://download.pytorch.org/whl/cpu
-#       torch==2.11.0
-#       torchvision==0.26.0
-#   (la app detecta automáticamente CPU/GPU en tiempo de ejecución).
+# TORCH / GPU vs CPU:
+#   Streamlit Community Cloud NO tiene GPU, por eso acá se usa la build CPU de
+#   torch/torchvision (extra-index-url de PyTorch CPU). La app detecta CPU/GPU
+#   en runtime, así que este mismo archivo sirve también en una máquina con GPU
+#   (solo correría en CPU). Para desarrollo local con GPU, usá la build CUDA
+#   (cu128) en tu entorno; no la fijes acá para no romper el deploy.
+--extra-index-url https://download.pytorch.org/whl/cpu
 
 streamlit==1.58.0
 torch==2.11.0
@@ -17,3 +16,8 @@ pillow==12.2.0
 pandas==3.0.3
 numpy==2.4.4
 opencv-python-headless==4.13.0
+
+# Descarga del modelo (~158 MB) desde Google Drive en el deploy. gdown maneja
+# la pantalla de confirmación de antivirus que Drive muestra para archivos
+# grandes, que urllib no sabe sortear. Ver MODEL_URL en prod/utils.py.
+gdown==5.2.0

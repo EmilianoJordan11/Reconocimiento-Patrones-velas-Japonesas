@@ -1,0 +1,28 @@
+# Tema de la app de inferencia (Semana 4) — "terminal financiera oscura".
+# Theming nativo de Streamlit: tema oscuro profundo con acento verde de velas.
+# Los detalles finos (header, cards, uploader, sidebar) se afinan con CSS en
+# prod/app.py (función inject_css).
+
+[theme]
+# Tema base oscuro.
+base = "dark"
+
+# Color de acento: verde "alcista" tipo terminal de trading.
+primaryColor = "#16C784"
+
+# Fondos: app profunda y superficies un punto más claras.
+backgroundColor = "#0B0E14"
+secondaryBackgroundColor = "#161B26"
+
+# Texto principal: gris muy claro (alta legibilidad sobre fondo oscuro).
+textColor = "#E6EAF2"
+
+# Tipografía sans-serif moderna (el @import de Inter va en el CSS).
+font = "sans serif"
+
+# Bordes redondeados, sobrios.
+baseRadius = "0.6rem"
+
+[server]
+# Evita recolección de estadísticas de uso en desarrollo.
+headless = true

@@ -1,11 +1,15 @@
-# Dataset
+# Dataset (no se versionan imágenes ni datos pesados)
 data/raw/
 data/processed/
 
-# Imágenes
+# Imágenes (del dataset; no se versionan)
 *.jpg
 *.jpeg
 *.png
+
+# Excepción: los assets de la app SÍ se versionan (logo, etc.), necesarios en deploy.
+!prod/assets/
+!prod/assets/**
 
 # Python
 __pycache__/
@@ -17,3 +21,18 @@ __pycache__/
 # Entornos virtuales
 venv/
 .env/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Documentos / consignas que no se versionan
+TP_Integrador_2026.pdf
+
+# Caché de descarga del modelo en producción (se baja desde MODEL_URL en runtime).
+# El modelo versionado vive en dev/modelo.pth (Git LFS); este es solo el caché local.
+prod/modelo.pth
+prod/*.part
+
+# Secrets de Streamlit (NO versionar el real; sí se versiona el .example).
+.streamlit/secrets.toml

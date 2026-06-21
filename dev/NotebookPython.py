@@ -47,9 +47,9 @@ SPLIT_CSV = {
 
 # --- Hiperparámetros Globales ---
 IMAGE_SIZE = 224
-BATCH_SIZE = 8       # Lote óptimo para salvaguardar la VRAM de la RTX 3060
-NUM_EPOCHS = 40      # 40 épocas solicitadas para maximizar convergencia
-NUM_WORKERS = 4      # 4 hilos en paralelo gracias al aislamiento del bloque main
+BATCH_SIZE = 8       
+NUM_EPOCHS = 100      
+NUM_WORKERS = 4      
 SEED = 42
 
 # =====================================================================
@@ -294,6 +294,9 @@ def visualize_predictions_vs_ground_truth(model, dataset, class_names, device, n
 # =====================================================================
 # BLOQUE PROTECTOR PRINCIPAL DE WINDOWS (Ejecución unificada protegida)
 # =====================================================================
+# =====================================================================
+# BLOQUE PROTECTOR PRINCIPAL DE WINDOWS (Ejecución unificada protegida)
+# =====================================================================
 if __name__ == '__main__':
     # Inicialización de entorno
     seed_everything()
@@ -331,28 +334,19 @@ if __name__ == '__main__':
     plt.ylabel("Cantidad de Cajas")
     plt.xticks(rotation=15)
     plt.grid(axis="y", alpha=0.3)
-    plt.savefig("dev/distribucion_instancias.png")  # Cambialo en cada bloque de gráficos
+    plt.savefig("dev/distribucion_instancias.png")
 
     total_instances = sum(class_counts.values())
     class_weights = {i: (total_instances / (NUM_CLASSES * class_counts[i]) if class_counts[i] > 0 else 1.0) for i in range(NUM_CLASSES)}
     print(f"Pesos de Clase calculados (Frecuencia Inversa): {class_weights}")
 
-    # --- Sección 6: Experimento 1 — Faster R-CNN Baseline ---
-    print("\n" + "="*50 + "\nIniciando Experimento 1: Baseline Faster R-CNN\n" + "="*50)
-    train_dataset_exp1 = CandlestickDetectionDataset(SPLIT_CSV["train"], PROCESSED_ROOT, label_offset=1)
-    valid_dataset_exp1 = CandlestickDetectionDataset(SPLIT_CSV["valid"], PROCESSED_ROOT, label_offset=1)
-
-    train_loader_exp1 = DataLoader(train_dataset_exp1, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS, collate_fn=detection_collate_fn)
-    valid_loader_exp1 = DataLoader(valid_dataset_exp1, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS, collate_fn=detection_collate_fn)
-
-    model_exp1 = build_faster_rcnn_model(num_classes=7)
-    optimizer_exp1 = torch.optim.SGD(model_exp1.parameters(), lr=0.005, momentum=0.9, weight_decay=0.0005)
-    scheduler_exp1 = torch.optim.lr_scheduler.StepLR(optimizer_exp1, step_size=10, gamma=0.5)
-
-    history_exp1 = train_detection_model(model_exp1, train_loader_exp1, valid_loader_exp1, optimizer_exp1, scheduler_exp1, NUM_EPOCHS, device, "exp1_baseline")
+    # =====================================================================
+    # EJECUCIÓN OPTIMIZADA: EXPERIMENTOS SELECCIONADOS (100 ÉPOCAS)
+    # =====================================================================
+    NUM_EPOCHS = 100  # Forzamos las 100 épocas óptimas para convergencia profunda
 
     # --- Sección 7: Experimento 2 — Faster R-CNN con Focal Loss ---
-    print("\n" + "="*50 + "\nIniciando Experimento 2: Faster R-CNN con Focal Loss\n" + "="*50)
+    print("\n" + "="*50 + "\nIniciando Experimento 2: Faster R-CNN con Focal Loss (100 Épocas)\n" + "="*50)
     train_dataset_exp2 = CandlestickDetectionDataset(SPLIT_CSV["train"], PROCESSED_ROOT, label_offset=1)
     valid_dataset_exp2 = CandlestickDetectionDataset(SPLIT_CSV["valid"], PROCESSED_ROOT, label_offset=1)
 
@@ -361,7 +355,7 @@ if __name__ == '__main__':
 
     model_exp2 = build_faster_rcnn_model(num_classes=7)
     optimizer_exp2 = torch.optim.SGD(model_exp2.parameters(), lr=0.005, momentum=0.9, weight_decay=0.0005)
-    scheduler_exp2 = torch.optim.lr_scheduler.StepLR(optimizer_exp2, step_size=10, gamma=0.5)
+    scheduler_exp2 = torch.optim.lr_scheduler.StepLR(optimizer_exp2, step_size=25, gamma=0.5) # Ajustado step a 25 para 100 épocas
 
     import torchvision.models.detection.roi_heads as _rh
     _original_loss = _rh.fastrcnn_loss
@@ -382,7 +376,7 @@ if __name__ == '__main__':
     _rh.fastrcnn_loss = _original_loss  # Restauración mandatoria
 
     # --- Sección 8: Experimento 3 — RetinaNet Baseline ---
-    print("\n" + "="*50 + "\nIniciando Experimento 3: RetinaNet Baseline\n" + "="*50)
+    print("\n" + "="*50 + "\nIniciando Experimento 3: RetinaNet Baseline (100 Épocas)\n" + "="*50)
     train_dataset_exp3 = CandlestickDetectionDataset(SPLIT_CSV["train"], PROCESSED_ROOT, label_offset=0)
     valid_dataset_exp3 = CandlestickDetectionDataset(SPLIT_CSV["valid"], PROCESSED_ROOT, label_offset=0)
 
@@ -391,50 +385,35 @@ if __name__ == '__main__':
 
     model_exp3 = build_retinanet_model(num_classes=6, focal_gamma=0.0, focal_alpha=0.25)
     optimizer_exp3 = torch.optim.SGD(model_exp3.parameters(), lr=0.002, momentum=0.9, weight_decay=0.0005)
-    scheduler_exp3 = torch.optim.lr_scheduler.StepLR(optimizer_exp3, step_size=10, gamma=0.5)
+    scheduler_exp3 = torch.optim.lr_scheduler.StepLR(optimizer_exp3, step_size=25, gamma=0.5) # Ajustado step a 25 para 100 épocas
 
     history_exp3 = train_detection_model(model_exp3, train_loader_exp3, valid_loader_exp3, optimizer_exp3, scheduler_exp3, NUM_EPOCHS, device, "exp3_retinanet_baseline")
-
-    # --- Sección 9: Experimento 4 — RetinaNet con Focal Loss ---
-    print("\n" + "="*50 + "\nIniciando Experimento 4: RetinaNet con Focal Loss\n" + "="*50)
-    train_dataset_exp4 = CandlestickDetectionDataset(SPLIT_CSV["train"], PROCESSED_ROOT, label_offset=0)
-    valid_dataset_exp4 = CandlestickDetectionDataset(SPLIT_CSV["valid"], PROCESSED_ROOT, label_offset=0)
-
-    train_loader_exp4 = DataLoader(train_dataset_exp4, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS, collate_fn=detection_collate_fn)
-    valid_loader_exp4 = DataLoader(valid_dataset_exp4, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS, collate_fn=detection_collate_fn)
-
-    model_exp4 = build_retinanet_model(num_classes=6, focal_gamma=2.0, focal_alpha=0.25)
-    optimizer_exp4 = torch.optim.SGD(model_exp4.parameters(), lr=0.002, momentum=0.9, weight_decay=0.0005)
-    scheduler_exp4 = torch.optim.lr_scheduler.StepLR(optimizer_exp4, step_size=10, gamma=0.5)
-
-    history_exp4 = train_detection_model(model_exp4, train_loader_exp4, valid_loader_exp4, optimizer_exp4, scheduler_exp4, NUM_EPOCHS, device, "exp4_retinanet_focal")
 
     # --- Sección 10: Tablas Comparativas y Gráficas de Línea ---
     print("\n" + "="*50 + "\nGENERANDO REPORTES Y COMPARATIVAS METRICAS\n" + "="*50)
     data_summary = [
-        {"Experimento": "Exp 1", "Modelo Base": "Faster R-CNN", "Estrategia Balanceo": "Ninguna (Baseline)", "Final Train Loss": history_exp1["train_loss"][-1], "Val mAP@0.5": history_exp1["val_mAP"][-1]},
         {"Experimento": "Exp 2", "Modelo Base": "Faster R-CNN", "Estrategia Balanceo": "Focal Loss (Patch)", "Final Train Loss": history_exp2["train_loss"][-1], "Val mAP@0.5": history_exp2["val_mAP"][-1]},
-        {"Experimento": "Exp 3", "Modelo Base": "RetinaNet", "Estrategia Balanceo": "Ninguna (Baseline)", "Final Train Loss": history_exp3["train_loss"][-1], "Val mAP@0.5": history_exp3["val_mAP"][-1]},
-        {"Experimento": "Exp 4", "Modelo Base": "RetinaNet", "Estrategia Balanceo": "Focal Loss (Nativa)", "Final Train Loss": history_exp4["train_loss"][-1], "Val mAP@0.5": history_exp4["val_mAP"][-1]}
+        {"Experimento": "Exp 3", "Modelo Base": "RetinaNet", "Estrategia Balanceo": "Ninguna (Baseline)", "Final Train Loss": history_exp3["train_loss"][-1], "Val mAP@0.5": history_exp3["val_mAP"][-1]}
     ]
     df_summary = pd.DataFrame(data_summary)
     print(df_summary.to_string(index=False))
 
-    # Renderizado de Curvas de Aprendizaje
+    # Renderizado de Curvas de Aprendizaje Adaptado a los 2 Experimentos activos
     epochs_range = range(1, NUM_EPOCHS + 1)
-    legends = ["Exp1: FasterRCNN Baseline", "Exp2: FasterRCNN Focal", "Exp3: RetinaNet Baseline", "Exp4: RetinaNet Focal"]
-    histories = [history_exp1, history_exp2, history_exp3, history_exp4]
+    legends = ["Exp2: FasterRCNN Focal", "Exp3: RetinaNet Baseline"]
+    histories = [history_exp2, history_exp3]
 
     # Gráfico 1 — Train Loss
     plt.figure(figsize=(12, 5))
     for h in histories: plt.plot(epochs_range, h["train_loss"], linewidth=2)
     plt.title("Evolución de Train Loss", fontsize=14)
-    plt.xlabel("Épocas"); plt.ylabel("Loss"); plt.legend(legends); plt.grid(True, alpha=0.3); plt.savefig("dev/curvas_aprendizaje_train_loss.png")  # Cambialo en cada bloque de gráficos
+    plt.xlabel("Épocas"); plt.ylabel("Loss"); plt.legend(legends); plt.grid(True, alpha=0.3); plt.savefig("dev/curvas_aprendizaje_train_loss.png")
+    
     # Gráfico 2 — mAP@0.5 General
     plt.figure(figsize=(12, 5))
     for h in histories: plt.plot(epochs_range, h["val_mAP"], linewidth=2)
     plt.title("Evolución de mAP@0.5 General", fontsize=14)
-    plt.xlabel("Épocas"); plt.ylabel("mAP@0.5"); plt.legend(legends); plt.grid(True, alpha=0.3); plt.savefig("dev/curvas_aprendizaje_val_mAP.png")  # Cambialo en cada bloque de gráficos
+    plt.xlabel("Épocas"); plt.ylabel("mAP@0.5"); plt.legend(legends); plt.grid(True, alpha=0.3); plt.savefig("dev/curvas_aprendizaje_val_mAP.png")
 
     # Gráficos 3 a 8 — mAP por Clase en malla 2x3
     fig, axes = plt.subplots(2, 3, figsize=(16, 10))
@@ -446,12 +425,12 @@ if __name__ == '__main__':
             ax.plot(epochs_range, class_curve, linewidth=1.5)
         ax.set_title(f"mAP@0.5 - {CLASS_NAMES[i]}", fontsize=12)
         ax.set_xlabel("Épocas"); ax.set_ylabel("mAP@0.5"); ax.legend(legends, fontsize=8); ax.grid(True, alpha=0.3)
-    plt.tight_layout(); plt.savefig("dev/curvas_aprendizaje_val_mAP_per_class.png")  # Cambialo en cada bloque de gráficos
+    plt.tight_layout(); plt.savefig("dev/curvas_aprendizaje_val_mAP_per_class.png")
 
     # --- Sección 11: Selección del Ganador y Evaluación Final en Test Set ---
     best_maps = [h["val_mAP"][-1] for h in histories]
     winner_idx = np.argmax(best_maps)
-    winner_exp_name = ["exp1_baseline", "exp2_focal", "exp3_retinanet_baseline", "exp4_retinanet_focal"][winner_idx]
+    winner_exp_name = ["exp2_focal", "exp3_retinanet_baseline"][winner_idx]
 
     print(f"\nGanador seleccionado para producción: {legends[winner_idx]} (mAP de Validación: {best_maps[winner_idx]:.4f})")
 
@@ -494,7 +473,3 @@ if __name__ == '__main__':
 
     file_size_mb = os.path.getsize(production_model_path) / (1024 * 1024)
     print(f"Tamaño del archivo en disco: {file_size_mb:.2f} MB")
-    if file_size_mb > 100:
-        print("\n[ADVERTENCIA GITHUB - LARGE FILE STORAGE]")
-        print("El archivo supera el umbral de 100 MB. Recuerde inicializar Git LFS ejecutando:")
-        print("  git lfs install\n  git lfs track 'dev/*.pth'")

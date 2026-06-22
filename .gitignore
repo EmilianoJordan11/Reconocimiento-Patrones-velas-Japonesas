@@ -11,6 +11,14 @@ data/processed/
 !prod/assets/
 !prod/assets/**
 
+# Pesos de modelos (.pth). Por defecto NO se versionan: son pesados y reproducibles.
+# Excepción: el modelo final de producción, que sí se versiona vía Git LFS.
+*.pth
+!dev/modelo.pth
+
+# Checkpoints de experimentos (locales, ~450 MB; reproducibles desde el notebook).
+dev/models_02/
+
 # Python
 __pycache__/
 *.pyc
@@ -20,7 +28,11 @@ __pycache__/
 
 # Entornos virtuales
 venv/
-.env/
+.venv/
+env/
+
+# Variables de entorno / secretos locales
+.env
 
 # Sistema operativo
 .DS_Store
@@ -30,8 +42,6 @@ Thumbs.db
 TP_Integrador_2026.pdf
 
 # Caché de descarga del modelo en producción (se baja desde MODEL_URL en runtime).
-# El modelo versionado vive en dev/modelo.pth (Git LFS); este es solo el caché local.
-prod/modelo.pth
 prod/*.part
 
 # Secrets de Streamlit (NO versionar el real; sí se versiona el .example).

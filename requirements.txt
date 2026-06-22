@@ -4,6 +4,8 @@ numpy
 matplotlib
 jupyter
 pyyaml
+torch
+torchvision
 torchmetrics>=1.0.0
 pycocotools
 Pillow

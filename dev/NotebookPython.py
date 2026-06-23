@@ -290,10 +290,6 @@ def visualize_predictions_vs_ground_truth(model, dataset, class_names, device, n
     plt.tight_layout()
     plt.savefig("dev/analisis_errores.png")
 
-
-# =====================================================================
-# BLOQUE PROTECTOR PRINCIPAL DE WINDOWS (Ejecución unificada protegida)
-# =====================================================================
 # =====================================================================
 # BLOQUE PROTECTOR PRINCIPAL DE WINDOWS (Ejecución unificada protegida)
 # =====================================================================
@@ -334,19 +330,19 @@ if __name__ == '__main__':
     plt.ylabel("Cantidad de Cajas")
     plt.xticks(rotation=15)
     plt.grid(axis="y", alpha=0.3)
-    plt.savefig("dev/distribucion_instancias.png")
+    plt.savefig(CURRENT_DIR / "distribucion_instancias.png")
 
     total_instances = sum(class_counts.values())
     class_weights = {i: (total_instances / (NUM_CLASSES * class_counts[i]) if class_counts[i] > 0 else 1.0) for i in range(NUM_CLASSES)}
     print(f"Pesos de Clase calculados (Frecuencia Inversa): {class_weights}")
 
     # =====================================================================
-    # EJECUCIÓN OPTIMIZADA: EXPERIMENTOS SELECCIONADOS (100 ÉPOCAS)
+    # EJECUCIÓN: COMPARATIVA DE FOCAL LOSS (100 ÉPOCAS)
     # =====================================================================
-    NUM_EPOCHS = 100  # Forzamos las 100 épocas óptimas para convergencia profunda
+    NUM_EPOCHS = 100  
 
     # --- Sección 7: Experimento 2 — Faster R-CNN con Focal Loss ---
-    print("\n" + "="*50 + "\nIniciando Experimento 2: Faster R-CNN con Focal Loss (100 Épocas)\n" + "="*50)
+    print("\n" + "="*50 + "\nIniciado Experimento 2: Faster R-CNN con Focal Loss (100 Épocas)\n" + "="*50)
     train_dataset_exp2 = CandlestickDetectionDataset(SPLIT_CSV["train"], PROCESSED_ROOT, label_offset=1)
     valid_dataset_exp2 = CandlestickDetectionDataset(SPLIT_CSV["valid"], PROCESSED_ROOT, label_offset=1)
 
@@ -355,7 +351,7 @@ if __name__ == '__main__':
 
     model_exp2 = build_faster_rcnn_model(num_classes=7)
     optimizer_exp2 = torch.optim.SGD(model_exp2.parameters(), lr=0.005, momentum=0.9, weight_decay=0.0005)
-    scheduler_exp2 = torch.optim.lr_scheduler.StepLR(optimizer_exp2, step_size=25, gamma=0.5) # Ajustado step a 25 para 100 épocas
+    scheduler_exp2 = torch.optim.lr_scheduler.StepLR(optimizer_exp2, step_size=25, gamma=0.5)
 
     import torchvision.models.detection.roi_heads as _rh
     _original_loss = _rh.fastrcnn_loss
@@ -372,50 +368,48 @@ if __name__ == '__main__':
         return classification_loss, box_loss
 
     _rh.fastrcnn_loss = _focal_loss_fn
-    history_exp2 = train_detection_model(model_exp2, train_loader_exp2, valid_loader_exp2, optimizer_exp2, scheduler_exp2, NUM_EPOCHS, device, "exp2_focal")
-    _rh.fastrcnn_loss = _original_loss  # Restauración mandatoria
+    # Se entrena temporalmente asignando un identificador para su posterior análisis
+    history_exp2 = train_detection_model(model_exp2, train_loader_exp2, valid_loader_exp2, optimizer_exp2, scheduler_exp2, NUM_EPOCHS, device, "temp_exp2_focal")
+    _rh.fastrcnn_loss = _original_loss  
 
-    # --- Sección 8: Experimento 3 — RetinaNet Baseline ---
-    print("\n" + "="*50 + "\nIniciando Experimento 3: RetinaNet Baseline (100 Épocas)\n" + "="*50)
-    train_dataset_exp3 = CandlestickDetectionDataset(SPLIT_CSV["train"], PROCESSED_ROOT, label_offset=0)
-    valid_dataset_exp3 = CandlestickDetectionDataset(SPLIT_CSV["valid"], PROCESSED_ROOT, label_offset=0)
+    # --- Sección 9: Experimento 4 — RetinaNet con Focal Loss Nativa ---
+    print("\n" + "="*50 + "\nIniciando Experimento 4: RetinaNet con Focal Loss Nativa (100 Épocas)\n" + "="*50)
+    train_dataset_exp4 = CandlestickDetectionDataset(SPLIT_CSV["train"], PROCESSED_ROOT, label_offset=0)
+    valid_dataset_exp4 = CandlestickDetectionDataset(SPLIT_CSV["valid"], PROCESSED_ROOT, label_offset=0)
 
-    train_loader_exp3 = DataLoader(train_dataset_exp3, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS, collate_fn=detection_collate_fn)
-    valid_loader_exp3 = DataLoader(valid_dataset_exp3, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS, collate_fn=detection_collate_fn)
+    train_loader_exp4 = DataLoader(train_dataset_exp4, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS, collate_fn=detection_collate_fn)
+    valid_loader_exp4 = DataLoader(valid_dataset_exp4, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS, collate_fn=detection_collate_fn)
 
-    model_exp3 = build_retinanet_model(num_classes=6, focal_gamma=0.0, focal_alpha=0.25)
-    optimizer_exp3 = torch.optim.SGD(model_exp3.parameters(), lr=0.002, momentum=0.9, weight_decay=0.0005)
-    scheduler_exp3 = torch.optim.lr_scheduler.StepLR(optimizer_exp3, step_size=25, gamma=0.5) # Ajustado step a 25 para 100 épocas
+    model_exp4 = build_retinanet_model(num_classes=6, focal_gamma=2.0, focal_alpha=0.25)
+    optimizer_exp4 = torch.optim.SGD(model_exp4.parameters(), lr=0.002, momentum=0.9, weight_decay=0.0005)
+    scheduler_exp4 = torch.optim.lr_scheduler.StepLR(optimizer_exp4, step_size=25, gamma=0.5)
 
-    history_exp3 = train_detection_model(model_exp3, train_loader_exp3, valid_loader_exp3, optimizer_exp3, scheduler_exp3, NUM_EPOCHS, device, "exp3_retinanet_baseline")
+    history_exp4 = train_detection_model(model_exp4, train_loader_exp4, valid_loader_exp4, optimizer_exp4, scheduler_exp4, NUM_EPOCHS, device, "temp_exp4_retinanet_focal")
 
-    # --- Sección 10: Tablas Comparativas y Gráficas de Línea ---
-    print("\n" + "="*50 + "\nGENERANDO REPORTES Y COMPARATIVAS METRICAS\n" + "="*50)
-    data_summary = [
-        {"Experimento": "Exp 2", "Modelo Base": "Faster R-CNN", "Estrategia Balanceo": "Focal Loss (Patch)", "Final Train Loss": history_exp2["train_loss"][-1], "Val mAP@0.5": history_exp2["val_mAP"][-1]},
-        {"Experimento": "Exp 3", "Modelo Base": "RetinaNet", "Estrategia Balanceo": "Ninguna (Baseline)", "Final Train Loss": history_exp3["train_loss"][-1], "Val mAP@0.5": history_exp3["val_mAP"][-1]}
-    ]
-    df_summary = pd.DataFrame(data_summary)
-    print(df_summary.to_string(index=False))
-
-    # Renderizado de Curvas de Aprendizaje Adaptado a los 2 Experimentos activos
+    # =====================================================================
+    # CONSIDERACIÓN 1: GRÁFICOS REALES CON ESCALA Y UNIFICADA (0.0 A 0.8)
+    # =====================================================================
+    print("\n" + "="*50 + "\nGENERANDO GRÁFICOS UNIFICADOS (ESCALA 0.0 - 0.8)\n" + "="*50)
     epochs_range = range(1, NUM_EPOCHS + 1)
-    legends = ["Exp2: FasterRCNN Focal", "Exp3: RetinaNet Baseline"]
-    histories = [history_exp2, history_exp3]
+    legends = ["Exp2: FasterRCNN Focal", "Exp4: RetinaNet Focal"]
+    histories = [history_exp2, history_exp4]
 
     # Gráfico 1 — Train Loss
     plt.figure(figsize=(12, 5))
     for h in histories: plt.plot(epochs_range, h["train_loss"], linewidth=2)
     plt.title("Evolución de Train Loss", fontsize=14)
-    plt.xlabel("Épocas"); plt.ylabel("Loss"); plt.legend(legends); plt.grid(True, alpha=0.3); plt.savefig("dev/curvas_aprendizaje_train_loss.png")
+    plt.xlabel("Épocas"); plt.ylabel("Loss"); plt.legend(legends); plt.grid(True, alpha=0.3)
+    plt.savefig(CURRENT_DIR / "curvas_aprendizaje_train_loss.png")
     
-    # Gráfico 2 — mAP@0.5 General
+    # Gráfico 2 — mAP@0.5 General (Unificado a 0.8)
     plt.figure(figsize=(12, 5))
     for h in histories: plt.plot(epochs_range, h["val_mAP"], linewidth=2)
     plt.title("Evolución de mAP@0.5 General", fontsize=14)
-    plt.xlabel("Épocas"); plt.ylabel("mAP@0.5"); plt.legend(legends); plt.grid(True, alpha=0.3); plt.savefig("dev/curvas_aprendizaje_val_mAP.png")
+    plt.xlabel("Épocas"); plt.ylabel("mAP@0.5"); plt.legend(legends); plt.grid(True, alpha=0.3)
+    plt.ylim(0.0, 0.8)  # Forzar escala unificada
+    plt.savefig(CURRENT_DIR / "curvas_aprendizaje_val_mAP.png")
 
-    # Gráficos 3 a 8 — mAP por Clase en malla 2x3
+    # Gráficos 3 a 8 — mAP por Clase en malla 2x3 (Todos fijos de 0.0 a 0.8)
     fig, axes = plt.subplots(2, 3, figsize=(16, 10))
     axes = axes.flatten()
     for i in range(NUM_CLASSES):
@@ -424,25 +418,66 @@ if __name__ == '__main__':
             class_curve = [epoch_per_class[i] for epoch_per_class in h["val_mAP_per_class"]]
             ax.plot(epochs_range, class_curve, linewidth=1.5)
         ax.set_title(f"mAP@0.5 - {CLASS_NAMES[i]}", fontsize=12)
-        ax.set_xlabel("Épocas"); ax.set_ylabel("mAP@0.5"); ax.legend(legends, fontsize=8); ax.grid(True, alpha=0.3)
-    plt.tight_layout(); plt.savefig("dev/curvas_aprendizaje_val_mAP_per_class.png")
+        ax.set_xlabel("Épocas"); ax.set_ylabel("mAP@0.5")
+        ax.set_ylim(0.0, 0.8)  # CONSIDERACIÓN 1: El mismo eje Y estricto para todos
+        ax.legend(legends, fontsize=8); ax.grid(True, alpha=0.3)
+    plt.tight_layout(); plt.savefig(CURRENT_DIR / "curvas_aprendizaje_val_mAP_per_class.png")
 
-    # --- Sección 11: Selección del Ganador y Evaluación Final en Test Set ---
-    best_maps = [h["val_mAP"][-1] for h in histories]
-    winner_idx = np.argmax(best_maps)
-    winner_exp_name = ["exp2_focal", "exp3_retinanet_baseline"][winner_idx]
-
-    print(f"\nGanador seleccionado para producción: {legends[winner_idx]} (mAP de Validación: {best_maps[winner_idx]:.4f})")
-
-    if "FasterRCNN" in legends[winner_idx]:
+    # =====================================================================
+    # CONSIDERACIÓN 2 & 3: SELECCIÓN, TABLA EN MARKDOWN Y EVACUACIÓN DE ARCHIVOS
+    # =====================================================================
+    map_exp2 = history_exp2["val_mAP"][-1]
+    map_exp4 = history_exp4["val_mAP"][-1]
+    
+    # Evaluar cuál fue matemáticamente el mejor
+    if map_exp2 > map_exp4:
+        winner_name = "exp2_faster_rcnn_focal"
+        winner_temp_flag = "temp_exp2_focal"
+        loser_temp_flag = "temp_exp4_retinanet_focal"
         production_model = build_faster_rcnn_model(num_classes=7)
         test_label_offset = 1
+        mark_exp2, mark_exp4 = "🏆 **GANADOR (MEJOR mAP)**", ""
     else:
-        production_model = build_retinanet_model(num_classes=6)
+        winner_name = "exp4_retinanet_focal"
+        winner_temp_flag = "temp_exp4_retinanet_focal"
+        loser_temp_flag = "temp_exp2_focal"
+        production_model = build_retinanet_model(num_classes=6, focal_gamma=2.0, focal_alpha=0.25)
         test_label_offset = 0
+        mark_exp2, mark_exp4 = "", "🏆 **GANADOR (MEJOR mAP)**"
 
-    winner_checkpoint = ROOT / "dev" / f"{winner_exp_name}_best.pth"
-    production_model.load_state_dict(torch.load(winner_checkpoint, map_location=device))
+    # CONSIDERACIÓN 2: Almacenar los resultados en una tabla estructurada Markdown (.md)
+    report_path = CURRENT_DIR / "reporte_experimentos.md"
+    markdown_content = f"""# Reporte de Rendimiento - Comparativa Focal Loss (100 Épocas)
+
+| Experimento | Modelo Base | Estrategia de Balanceo | Final Train Loss | Validación mAP@0.5 | Estado |
+| :--- | :--- | :--- | :---: | :---: | :--- |
+| **Exp 2** | Faster R-CNN | Focal Loss (Patch) | {history_exp2['train_loss'][-1]:.4f} | {map_exp2:.4f} | {mark_exp2} |
+| **Exp 4** | RetinaNet | Focal Loss (Nativa) | {history_exp4['train_loss'][-1]:.4f} | {map_exp4:.4f} | {mark_exp4} |
+
+*Nota: Reporte automatizado generado de forma nativa por el pipeline de entrenamiento el 21/06/2026.*
+"""
+    report_path.write_text(markdown_content, encoding="utf-8")
+    print(f"\nTabla de rendimiento guardada exitosamente en: {report_path}")
+
+    # CONSIDERACIÓN 3: Consolidar solo el ganador con el nombre del experimento y purgar los peores
+    winner_temp_file = CURRENT_DIR / f"{winner_temp_flag}_best.pth"
+    loser_temp_file = CURRENT_DIR / f"{loser_temp_flag}_best.pth"
+    
+    final_winner_path = CURRENT_DIR / f"{winner_name}_best.pth"
+    
+    # Renombrar el mejor al nombre de su experimento
+    if winner_temp_file.exists():
+        winner_temp_file.rename(final_winner_path)
+    
+    # Eliminar el peor para no dejar basura colgada ni saturar el disco
+    if loser_temp_file.exists():
+        loser_temp_file.unlink()
+        print(f"Purgado de disco: Se eliminó el checkpoint del experimento perdedor ({loser_temp_flag}_best.pth).")
+
+    print(f"🏆 Modelo consolidado único guardado exitosamente como: {final_winner_path.name}")
+
+    # --- Evaluación Final en Test Set usando el archivo guardado legítimo ---
+    production_model.load_state_dict(torch.load(final_winner_path, map_location=device))
     production_model.to(device)
     production_model.eval()
 
@@ -462,14 +497,9 @@ if __name__ == '__main__':
     for i, class_name in enumerate(CLASS_NAMES):
         print(f"mAP@0.5 Desglosado -> Clase [{class_name}]: {test_results['map_per_class'][i].item():.4f}")
 
-    # --- Sección 12: Diagnóstico Visual de Errores ---
+    # --- Diagnóstico Visual de Errores y Exportación a producción ---
     visualize_predictions_vs_ground_truth(production_model, test_dataset, CLASS_NAMES, device, num_images=8)
-
-    # --- Sección 13: Exportación Final Custodiada ---
-    production_model_path = ROOT / "dev" / "modelo.pth"
-    production_model_path.parent.mkdir(parents=True, exist_ok=True)
-    torch.save(production_model.state_dict(), production_model_path)
-    print(f"\n¡Modelo de producción consolidado con éxito en: {production_model_path}!")
-
-    file_size_mb = os.path.getsize(production_model_path) / (1024 * 1024)
-    print(f"Tamaño del archivo en disco: {file_size_mb:.2f} MB")
+    
+    # Duplicar el ganador como 'modelo.pth' para que Streamlit mantenga su compatibilidad directa
+    torch.save(production_model.state_dict(), CURRENT_DIR / "modelo.pth")
+    print("¡Proceso finalizado con éxito! El Ryzen 7 ya puede proceder al apagado seguro.")

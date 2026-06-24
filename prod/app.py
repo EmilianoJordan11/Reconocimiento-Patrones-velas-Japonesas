@@ -248,37 +248,40 @@ def strip_white_background(img: Image.Image) -> Image.Image:
 # --------------------------------------------------------------------------- #
 def inject_css() -> None:
     """
-    Inyecta TODO el CSS propio de la app: tema "terminal financiera oscura".
+    Inyecta TODO el CSS propio de la app: tema CLARO, formal y sobrio.
     Toda la presentación vive acá; los controles (uploader, slider, checkbox)
     siguen siendo widgets st.* y solo se les da estilo.
 
     Paleta:
-        --bg       #0B0E14  fondo profundo
-        --bg-2     #0F1420  fondo alterno (hero)
-        --surface  #161B26  tarjetas
-        --border   #252C3A  bordes sutiles
-        --ink      #E6EAF2  texto principal
-        --muted    #8A93A6  texto secundario
-        --accent   #16C784  verde alcista (acento principal)
-        --down     #EA3943  rojo bajista
-        --cool     #3B82F6  acento frío neutro para detalles
-    Tipografía: Inter (sans) + JetBrains Mono (números/scores, look terminal).
+        --bg       #F4F6F9  fondo claro (blanco hueso)
+        --surface  #FFFFFF  tarjetas / superficies
+        --border   #E2E8F0  bordes sutiles
+        --ink      #1F2937  texto principal (gris azulado oscuro)
+        --muted    #64748B  texto secundario
+        --accent   #1E3A8A  azul marino corporativo (acento principal)
+        --up       #15803D  verde alcista (sobrio)
+        --down     #B91C1C  rojo bajista (sobrio)
+    Tipografía: Fraunces (serif, títulos) + Inter (sans, cuerpo) +
+    JetBrains Mono (números/scores).
     """
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@500;600&display=swap');
 
         :root {
-            --bg: #0B0E14; --bg-2: #0F1420; --surface: #161B26; --surface-2: #1C2330;
-            --border: #252C3A; --border-strong: #313A4C;
-            --ink: #E6EAF2; --muted: #8A93A6;
-            --accent: #16C784; --accent-dim: rgba(22,199,132,.14);
-            --down: #EA3943; --down-dim: rgba(234,57,67,.14);
-            --cool: #3B82F6;
+            /* Paleta clara, formal y sobria */
+            --bg: #F4F6F9; --bg-2: #FFFFFF; --surface: #FFFFFF; --surface-2: #F1F4F9;
+            --border: #E2E8F0; --border-strong: #CBD5E1;
+            --ink: #1F2937; --ink-soft: #334155; --muted: #64748B;
+            --accent: #1E3A8A; --accent-soft: #2563EB; --accent-dim: rgba(37,99,235,.08);
+            --up: #15803D; --up-dim: rgba(21,128,61,.09);
+            --down: #B91C1C; --down-dim: rgba(185,28,28,.08);
+            --shadow: 0 1px 2px rgba(15,23,42,.04), 0 8px 24px rgba(15,23,42,.06);
+            --shadow-sm: 0 1px 3px rgba(15,23,42,.06);
         }
 
-        /* Tipografía global */
+        /* Tipografía global: Inter para cuerpo, Fraunces (serif) para títulos */
         html, body, [class*="css"], .stApp, .stMarkdown, p, span, div, label,
         button, input, textarea { font-family: 'Inter', system-ui, sans-serif; }
 
@@ -290,137 +293,145 @@ def inject_css() -> None:
         header { background: transparent !important; }
         footer { visibility: hidden; }
 
+        /* PERO mantener visible el botón que REABRE el sidebar cuando se colapsa. */
+        [data-testid="stSidebarCollapsedControl"],
+        [data-testid="collapsedControl"],
+        [data-testid="stExpandSidebarButton"],
+        [data-testid="stSidebarCollapseButton"] {
+            visibility: visible !important;
+            display: flex !important;
+            z-index: 1000 !important;
+        }
+
         .stApp { background:
-            radial-gradient(1200px 600px at 80% -10%, rgba(22,199,132,.06), transparent 60%),
-            radial-gradient(1000px 500px at -10% 0%, rgba(59,130,246,.05), transparent 55%),
+            radial-gradient(1100px 520px at 85% -8%, rgba(37,99,235,.05), transparent 60%),
+            radial-gradient(900px 480px at -8% 0%, rgba(30,58,138,.04), transparent 55%),
             var(--bg);
         }
-        .block-container { padding-top: 1.6rem; padding-bottom: 3rem; max-width: 1160px; }
+        .block-container { padding-top: 1.8rem; padding-bottom: 3.5rem; max-width: 1120px; }
 
-        h1, h2, h3, h4 { color: var(--ink); letter-spacing: -0.02em; }
+        h1, h2, h3, h4 { color: var(--ink); letter-spacing: -0.01em; }
 
         /* ===== HERO ======================================================== */
         .hero {
             position: relative; overflow: hidden;
             display: flex; align-items: center; gap: 1.5rem;
-            background:
-                linear-gradient(135deg, var(--bg-2) 0%, #121A2A 55%, rgba(22,199,132,.10) 130%);
+            background: linear-gradient(180deg, #FFFFFF 0%, #FAFBFD 100%);
             border: 1px solid var(--border);
-            border-radius: 18px; padding: 1.5rem 1.8rem; margin-bottom: 1.4rem;
-            box-shadow: 0 10px 40px rgba(0,0,0,.35);
+            border-radius: 18px; padding: 1.7rem 2rem; margin-bottom: 1.6rem;
+            box-shadow: var(--shadow);
         }
-        .hero::after {
-            content: ""; position: absolute; right: -40px; top: -60px;
-            width: 240px; height: 240px; border-radius: 50%;
-            background: radial-gradient(circle, rgba(22,199,132,.18), transparent 70%);
-            pointer-events: none;
+        /* Filete de acento superior */
+        .hero::before {
+            content: ""; position: absolute; left: 0; top: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-soft) 100%);
         }
-        /* Baldosa clara detrás del logo: el logo es azul oscuro y sobre el hero
-           oscuro casi no se ve, así que lo apoyamos sobre un fondo claro. */
         .hero .logo-plate {
             z-index: 1; flex: 0 0 auto;
-            background: linear-gradient(160deg, #FFFFFF 0%, #EAF1F9 100%);
-            border: 1px solid rgba(255,255,255,.7); border-radius: 18px;
+            background: #FFFFFF;
+            border: 1px solid var(--border); border-radius: 16px;
             padding: .7rem .9rem; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,.45);
+            box-shadow: var(--shadow-sm);
         }
-        .hero .logo { height: 84px; width: auto; object-fit: contain; display: block; }
+        .hero .logo { height: 76px; width: auto; object-fit: contain; display: block; }
         .hero .logo-fallback {
-            height: 72px; width: 72px; border-radius: 16px; z-index: 1;
+            height: 68px; width: 68px; border-radius: 16px; z-index: 1;
             display: flex; align-items: center; justify-content: center;
-            background: var(--accent-dim); border: 1px solid var(--border-strong); font-size: 2.1rem;
+            background: var(--accent-dim); border: 1px solid var(--border); font-size: 2rem;
         }
         .hero-text { z-index: 1; }
-        .hero-title { font-size: 2rem; font-weight: 800; color: var(--ink); margin: 0; line-height: 1.02; }
+        .hero-title { font-family: 'Fraunces', Georgia, serif; font-size: 2.1rem; font-weight: 600;
+            color: var(--ink); margin: 0; line-height: 1.05; letter-spacing: -0.01em; }
         .hero-title .accent { color: var(--accent); }
-        .hero-sub { color: var(--muted); font-size: 1.02rem; margin: .4rem 0 0 0; line-height: 1.45; max-width: 680px; }
+        .hero-sub { color: var(--muted); font-size: 1.02rem; margin: .5rem 0 0 0; line-height: 1.5; max-width: 680px; }
 
         /* ===== FILA DE STATS / CHIPS ====================================== */
-        .stats { display: flex; flex-wrap: wrap; gap: .8rem; margin-bottom: 1.6rem; }
+        .stats { display: flex; flex-wrap: wrap; gap: .8rem; margin-bottom: 1.8rem; }
         .stat {
             flex: 1 1 180px; background: var(--surface); border: 1px solid var(--border);
-            border-radius: 14px; padding: .85rem 1.05rem;
-            display: flex; align-items: center; gap: .8rem; transition: border-color .2s, transform .2s;
+            border-radius: 12px; padding: .9rem 1.1rem; box-shadow: var(--shadow-sm);
+            display: flex; align-items: center; gap: .8rem; transition: box-shadow .2s, transform .2s;
         }
-        .stat:hover { border-color: var(--border-strong); transform: translateY(-2px); }
-        .stat .ico { font-size: 1.3rem; }
-        .stat .k { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
+        .stat:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+        .stat .ico { font-size: 1.25rem; }
+        .stat .k { color: var(--muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
         .stat .v { color: var(--ink); font-weight: 700; font-size: 1.02rem;
             font-family: 'JetBrains Mono', monospace; }
-        .stat .v.green { color: var(--accent); }
+        .stat .v.green { color: var(--up); }
 
         /* ===== TARJETAS GENÉRICAS ========================================= */
         .card {
             background: var(--surface); border: 1px solid var(--border);
-            border-radius: 16px; padding: 1.2rem 1.35rem; margin-bottom: 1.1rem;
-            box-shadow: 0 6px 24px rgba(0,0,0,.25); transition: border-color .2s, transform .2s;
+            border-radius: 14px; padding: 1.3rem 1.5rem; margin-bottom: 1.1rem;
+            box-shadow: var(--shadow); transition: box-shadow .2s, transform .2s;
         }
-        .card:hover { border-color: var(--border-strong); }
+        .card:hover { box-shadow: 0 2px 4px rgba(15,23,42,.05), 0 12px 32px rgba(15,23,42,.09); }
         .card-title {
             font-weight: 700; color: var(--ink); font-size: 1.02rem;
-            margin: 0 0 .8rem 0; padding-bottom: .6rem;
+            margin: 0 0 .85rem 0; padding-bottom: .65rem;
             border-bottom: 1px solid var(--border);
             display: flex; align-items: center; gap: .5rem;
         }
         .section-title {
-            font-weight: 800; color: var(--ink); font-size: 1.3rem;
-            margin: 1.8rem 0 .9rem 0; letter-spacing: -0.02em;
+            font-family: 'Fraunces', Georgia, serif;
+            font-weight: 600; color: var(--ink); font-size: 1.4rem;
+            margin: 2rem 0 1rem 0; letter-spacing: -0.01em;
         }
 
         /* Imagen dentro de tarjeta */
-        .img-card { padding: .8rem; }
-        .img-card img { border-radius: 12px; width: 100%; display: block; border: 1px solid var(--border); }
-        .img-card .cap { color: var(--muted); font-size: .82rem; text-align: center; margin-top: .6rem; }
+        .img-card { padding: .9rem; }
+        .img-card img { border-radius: 10px; width: 100%; display: block; border: 1px solid var(--border); }
+        .img-card .cap { color: var(--muted); font-size: .82rem; text-align: center; margin-top: .7rem; }
 
         /* ===== ESTADO VACÍO =============================================== */
         .empty {
-            text-align: center; padding: 3rem 1.5rem; margin-top: .5rem;
-            background: var(--surface); border: 1px dashed var(--border-strong);
-            border-radius: 18px;
+            text-align: center; padding: 3.2rem 1.5rem; margin-top: .5rem;
+            background: var(--surface); border: 1.5px dashed var(--border-strong);
+            border-radius: 16px; box-shadow: var(--shadow-sm);
         }
-        .empty .big { font-size: 3.4rem; line-height: 1; margin-bottom: .6rem; filter: grayscale(.1); }
-        .empty .t { color: var(--ink); font-weight: 700; font-size: 1.15rem; }
-        .empty .d { color: var(--muted); font-size: .95rem; margin-top: .35rem; }
-        .empty .steps { display: flex; justify-content: center; gap: 1.4rem; flex-wrap: wrap; margin-top: 1.6rem; }
-        .empty .step { display: flex; align-items: center; gap: .55rem; color: var(--muted); font-size: .9rem; }
+        .empty .big { font-size: 3.2rem; line-height: 1; margin-bottom: .7rem; }
+        .empty .t { color: var(--ink); font-weight: 700; font-size: 1.18rem; }
+        .empty .d { color: var(--muted); font-size: .95rem; margin-top: .4rem; }
+        .empty .steps { display: flex; justify-content: center; gap: 1.6rem; flex-wrap: wrap; margin-top: 1.8rem; }
+        .empty .step { display: flex; align-items: center; gap: .55rem; color: var(--ink-soft); font-size: .9rem; }
         .empty .step .n {
             width: 26px; height: 26px; border-radius: 50%; flex: 0 0 auto;
             display: flex; align-items: center; justify-content: center;
-            background: var(--accent-dim); color: var(--accent);
+            background: var(--accent-dim); color: var(--accent-soft);
             font-weight: 700; font-size: .85rem; font-family: 'JetBrains Mono', monospace;
         }
 
         /* ===== BLOQUE DE SESGO (alza / baja) ============================== */
         .bias {
             display: flex; align-items: center; gap: .8rem;
-            border-radius: 12px; padding: .9rem 1.1rem; font-weight: 600;
+            border-radius: 10px; padding: .9rem 1.1rem; font-weight: 600;
             border: 1px solid var(--border); margin-bottom: .8rem;
         }
-        .bias .ico { font-size: 1.5rem; line-height: 1; }
-        .bias.up   { background: var(--accent-dim); border-color: rgba(22,199,132,.35); color: var(--accent); }
-        .bias.down { background: var(--down-dim);   border-color: rgba(234,57,67,.35);  color: var(--down); }
+        .bias .ico { font-size: 1.4rem; line-height: 1; }
+        .bias.up   { background: var(--up-dim);   border-color: rgba(21,128,61,.28);  color: var(--up); }
+        .bias.down { background: var(--down-dim); border-color: rgba(185,28,28,.28); color: var(--down); }
 
-        .pattern-text { color: var(--ink); line-height: 1.6; }
+        .pattern-text { color: var(--ink-soft); line-height: 1.65; }
         .pattern-text b { color: var(--ink); }
-        .note { color: var(--muted); font-size: .85rem; margin-top: .5rem; line-height: 1.5; }
+        .note { color: var(--muted); font-size: .85rem; margin-top: .5rem; line-height: 1.55; }
 
         /* Tarjeta de explicación con borde de acento a la izquierda */
-        .explain-card { border-left: 4px solid var(--accent); }
+        .explain-card { border-left: 3px solid var(--accent); }
 
         /* ===== DISCLAIMER (siempre visible) =============================== */
         .disclaimer {
-            background: rgba(59,130,246,.08); border: 1px solid rgba(59,130,246,.28);
-            color: #B9CDEC; border-radius: 12px; padding: .9rem 1.1rem; font-size: .88rem;
-            margin: 1rem 0; line-height: 1.5;
+            background: var(--accent-dim); border: 1px solid rgba(37,99,235,.22);
+            color: var(--accent); border-radius: 10px; padding: .9rem 1.1rem; font-size: .88rem;
+            margin: 1rem 0; line-height: 1.55;
         }
-        .disclaimer b { color: #D7E4F7; }
+        .disclaimer b { color: var(--accent); }
 
         /* ===== BARRAS DE CONFIANZA POR CLASE ============================== */
-        .scores { display: flex; flex-direction: column; gap: .55rem; margin-top: .3rem; }
+        .scores { display: flex; flex-direction: column; gap: .6rem; margin-top: .3rem; }
         .score-row { display: flex; align-items: center; gap: .8rem; }
-        .score-name { width: 155px; font-size: .85rem; color: var(--ink); flex: 0 0 auto; }
+        .score-name { width: 155px; font-size: .85rem; color: var(--ink-soft); flex: 0 0 auto; }
         .score-track {
-            flex: 1; height: 10px; background: var(--surface-2); border-radius: 999px;
+            flex: 1; height: 9px; background: var(--surface-2); border-radius: 999px;
             overflow: hidden; border: 1px solid var(--border);
         }
         .score-fill { height: 100%; border-radius: 999px; transition: width .4s ease; }
@@ -430,79 +441,82 @@ def inject_css() -> None:
         /* ===== UPLOADER ESTILIZADO ======================================== */
         [data-testid="stFileUploaderDropzone"] {
             background: var(--surface); border: 1.5px dashed var(--border-strong);
-            border-radius: 14px; transition: border-color .2s, background .2s;
+            border-radius: 12px; transition: border-color .2s, background .2s;
         }
         [data-testid="stFileUploaderDropzone"]:hover {
-            border-color: var(--accent); background: var(--surface-2);
+            border-color: var(--accent-soft); background: var(--accent-dim);
         }
         [data-testid="stFileUploaderDropzone"] * { color: var(--muted); }
         [data-testid="stFileUploaderDropzone"] button {
-            background: var(--accent-dim); color: var(--accent);
-            border: 1px solid rgba(22,199,132,.35); border-radius: 10px; font-weight: 600;
+            background: var(--accent); color: #FFFFFF;
+            border: 1px solid var(--accent); border-radius: 9px; font-weight: 600;
         }
         [data-testid="stFileUploaderDropzone"] button:hover {
-            background: rgba(22,199,132,.22); border-color: var(--accent);
+            background: var(--accent-soft); border-color: var(--accent-soft);
         }
 
         /* ===== BOTONES ==================================================== */
         .stButton > button {
-            border-radius: 10px; border: 1px solid var(--border-strong);
-            background: var(--surface); color: var(--ink); font-weight: 600;
-            transition: border-color .2s, background .2s, transform .1s;
+            border-radius: 9px; border: 1px solid var(--border-strong);
+            background: var(--surface); color: var(--ink-soft); font-weight: 600;
+            box-shadow: var(--shadow-sm);
+            transition: border-color .2s, background .2s, color .2s, transform .1s;
         }
         .stButton > button:hover {
-            border-color: var(--accent); color: var(--accent); background: var(--surface-2);
+            border-color: var(--accent-soft); color: var(--accent); background: var(--accent-dim);
         }
         .stButton > button:active { transform: translateY(1px); }
 
         /* ===== BANNER "modelo cargado" (st.success) ====================== */
-        [data-testid="stAlert"] { border-radius: 12px; }
+        [data-testid="stAlert"] { border-radius: 10px; }
 
         /* ===== TABLA / DATAFRAME ========================================= */
-        [data-testid="stDataFrame"] { border: 1px solid var(--border); border-radius: 12px; }
+        [data-testid="stDataFrame"] { border: 1px solid var(--border); border-radius: 10px; }
 
         /* ===== EXPANDERS ================================================= */
         [data-testid="stExpander"] {
-            border: 1px solid var(--border); border-radius: 12px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: 10px; background: var(--surface);
+            box-shadow: var(--shadow-sm);
         }
 
         /* ===== BARRA LATERAL ============================================= */
         [data-testid="stSidebar"] {
-            background: var(--bg-2); border-right: 1px solid var(--border);
+            background: #FFFFFF; border-right: 1px solid var(--border);
         }
-        [data-testid="stSidebar"] .block-container { padding-top: 1.4rem; }
-        .side-title { font-size: 1.15rem; font-weight: 800; color: var(--ink); margin: .1rem 0 .9rem 0; }
+        [data-testid="stSidebar"] .block-container { padding-top: 1.5rem; }
+        .side-title { font-family: 'Fraunces', Georgia, serif; font-size: 1.2rem; font-weight: 600;
+            color: var(--ink); margin: .1rem 0 .9rem 0; }
         .side-help {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 12px; padding: .8rem .9rem; font-size: .85rem;
-            color: var(--muted); margin-bottom: 1.2rem; line-height: 1.45;
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: 10px; padding: .85rem .95rem; font-size: .85rem;
+            color: var(--ink-soft); margin-bottom: 1.2rem; line-height: 1.5;
         }
         .side-help b { color: var(--accent); }
         .side-help ol { margin: .45rem 0 0 0; padding-left: 1.1rem; }
         .side-help li { margin-bottom: .25rem; }
         .side-label {
             font-size: .7rem; font-weight: 700; text-transform: uppercase;
-            letter-spacing: .06em; color: var(--muted); margin: 1.2rem 0 .4rem 0;
+            letter-spacing: .06em; color: var(--muted); margin: 1.2rem 0 .45rem 0;
         }
-        .side-foot { color: #5C6678; font-size: .74rem; margin-top: 1.5rem;
-            border-top: 1px solid var(--border); padding-top: .8rem;
+        .side-foot { color: var(--muted); font-size: .74rem; margin-top: 1.6rem;
+            border-top: 1px solid var(--border); padding-top: .85rem;
             font-family: 'JetBrains Mono', monospace; }
 
         /* ===== LEYENDA POR CLASE (agrupada por sesgo) ==================== */
         .legend-group { margin-bottom: .8rem; }
-        .legend-head { font-size: .8rem; font-weight: 700; color: var(--ink); margin-bottom: .4rem; }
+        .legend-head { font-size: .8rem; font-weight: 700; color: var(--ink); margin-bottom: .45rem; }
         .legend { display: flex; flex-direction: column; gap: .4rem; padding-left: .15rem; }
-        .chip { display: inline-flex; align-items: center; gap: .55rem; font-size: .85rem; color: var(--ink); }
+        .chip { display: inline-flex; align-items: center; gap: .55rem; font-size: .85rem; color: var(--ink-soft); }
         .dot  { width: .8rem; height: .8rem; border-radius: 50%; display: inline-block;
-            flex: 0 0 auto; box-shadow: 0 0 0 2px rgba(255,255,255,.06); }
+            flex: 0 0 auto; box-shadow: 0 0 0 2px rgba(15,23,42,.04); }
 
         /* ===== FOOTER ==================================================== */
         .footer {
-            text-align: center; margin-top: 2.6rem; padding-top: 1.2rem;
+            text-align: center; margin-top: 2.8rem; padding-top: 1.3rem;
             border-top: 1px solid var(--border); color: var(--muted); font-size: .85rem;
         }
         .footer .brand { color: var(--accent); font-weight: 700; }
-        .footer .mono { font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: #5C6678; }
+        .footer .mono { font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: var(--muted); }
 
         /* ===== RESPONSIVE =============================================== */
         @media (max-width: 640px) {
@@ -728,6 +742,66 @@ def render_footer() -> str:
     )
 
 
+def limitations_html() -> str:
+    """
+    HTML con las limitaciones de uso de la app. Los números salen del dataset
+    real de entrenamiento (ver dev/): IMAGE_SIZE=224 y ~1 patrón por imagen.
+    """
+    return (
+        '<div class="card" style="border-left:4px solid var(--cool)">'
+        '<div class="card-title">⚠️ Limitaciones de la app</div>'
+        '<ul class="pattern-text" style="margin:0;padding-left:1.1rem;line-height:1.7">'
+        "<li><b>Tamaño de imagen:</b> internamente toda imagen se redimensiona a "
+        "<b>224×224 px</b>. Conviene subir imágenes aproximadamente cuadradas y "
+        "nítidas; las muy alargadas o de baja resolución se deforman y se detectan peor.</li>"
+        "<li><b>Cuántas velas por imagen:</b> se recomienda subir gráficos de "
+        "<b>5 a 10 velas</b> (diarias). El modelo se entrenó con recortes chicos, "
+        "centrados en el patrón, así que no está pensado para un gráfico largo con "
+        "decenas de velas: en ese caso puede no detectar nada o confundirse. "
+        "Lo ideal es un recorte acotado alrededor del patrón.</li>"
+        "<li><b>Dominio de entrenamiento:</b> aprendió con velas sobre <b>fondo negro</b>. "
+        "Para capturas con fondo blanco/grilla, dejá activado «Quitar fondo claro».</li>"
+        "<li><b>Solo 6 patrones:</b> reconoce únicamente las 6 clases listadas. "
+        "Cualquier otra figura o imagen fuera de ese conjunto no se detecta.</li>"
+        "</ul>"
+        "</div>"
+    )
+
+
+def pattern_explain_html(class_name: str, score: float) -> str:
+    """
+    HTML de la tarjeta explicativa de UN patrón detectado (sesgo + resumen).
+
+    Se usa una vez por cada patrón distinto detectado, para explicar TODOS los
+    que aparecen en la imagen y no solo el de mayor score. El contenido sale de
+    PATTERN_INFO (estático); acá solo se maqueta.
+    """
+    info = PATTERN_INFO.get(class_name)
+    if not info:
+        return (
+            f'<div class="card pattern-text">Se detectó el patrón '
+            f"<b>{class_name}</b> (confianza {score:.0%}).</div>"
+        )
+
+    bias_cls = "up" if info["bias"] == "alcista" else "down"
+    bias_dir = "al alza" if info["bias"] == "alcista" else "a la baja"
+    bias_word = "alcista" if info["bias"] == "alcista" else "bajista"
+    return (
+        f'<div class="card explain-card">'
+        f'<div class="card-title">💡 «{class_name}» '
+        f'<span style="color:var(--muted);font-weight:600;font-size:.85rem">'
+        f"· confianza {score:.0%}</span></div>"
+        f'<div class="bias {bias_cls}">'
+        f'<span class="ico">{info["icon"]}</span>'
+        f"<span>Patrón de sesgo {bias_word} — la teoría lo vigila como posible "
+        f"giro <b>{bias_dir} de acá en adelante</b>.</span>"
+        f"</div>"
+        f'<p class="pattern-text" style="margin-top:.8rem">'
+        f'{md_inline_to_html(info["summary"])}</p>'
+        f"</div>"
+    )
+
+
 # --------------------------------------------------------------------------- #
 # Barra lateral
 # --------------------------------------------------------------------------- #
@@ -826,6 +900,7 @@ uploaded = st.file_uploader(
 # 4) Estado vacío lindo (cuando no hay imagen)
 if uploaded is None:
     st.markdown(render_empty_state(), unsafe_allow_html=True)
+    st.markdown(limitations_html(), unsafe_allow_html=True)
     st.markdown(render_footer(), unsafe_allow_html=True)
     st.stop()
 
@@ -849,57 +924,52 @@ with st.spinner("Analizando la imagen…"):
 detections = result["detections"]
 annotated = draw_detections(result["image"], detections)
 
-# --- Imagen original vs anotada, lado a lado (tarjetas HTML) -----------------
+# --- Imagen anotada (ÚNICA), más grande y centrada ---------------------------
+# Se muestra solo la imagen con los bounding boxes dibujados (no la original
+# por separado): es la que aporta información útil sobre qué se detectó y dónde.
 st.markdown('<div class="section-title">🔍 Resultado</div>', unsafe_allow_html=True)
-col1, col2 = st.columns(2, gap="large")
-with col1:
-    st.markdown(
-        image_card_html(result["image"], "🖼️ Tu gráfico", "Imagen analizada"),
-        unsafe_allow_html=True,
-    )
-with col2:
+_, col_mid, _ = st.columns([1, 2, 1])
+with col_mid:
     st.markdown(
         image_card_html(annotated, "🎯 Patrón marcado", "Dónde se encontró el patrón"),
         unsafe_allow_html=True,
     )
 
-# --- Explicación del gráfico (lo principal, en lenguaje natural) ------------
-# El contenido sale de PATTERN_INFO (estático); acá solo se maqueta con HTML.
+# --- Explicación del gráfico: TODOS los patrones detectados -----------------
+# Se explica cada patrón distinto encontrado (no solo el de mayor score),
+# agrupando por clase y quedándose con el score más alto de cada una.
 st.markdown('<div class="section-title">¿Qué muestra este gráfico?</div>', unsafe_allow_html=True)
-if result["top"] is not None:
-    top = result["top"]
-    info = PATTERN_INFO.get(top["class_name"])
+if detections:
+    # Mejor score por clase, ordenado de mayor a menor confianza.
+    best_by_class: dict[str, float] = {}
+    for det in detections:
+        name = det["class_name"]
+        if det["score"] > best_by_class.get(name, 0.0):
+            best_by_class[name] = det["score"]
+    patterns = sorted(best_by_class.items(), key=lambda kv: kv[1], reverse=True)
 
-    if info:
-        # Sesgo direccional como EXPECTATIVA A FUTURO (no el movimiento ya visible).
-        bias_cls = "up" if info["bias"] == "alcista" else "down"
-        bias_dir = "al alza" if info["bias"] == "alcista" else "a la baja"
-        bias_word = "alcista" if info["bias"] == "alcista" else "bajista"
+    if len(patterns) > 1:
         st.markdown(
-            f'<div class="card explain-card">'
-            f'<div class="card-title">💡 ¿Qué significa «{top["class_name"]}»?</div>'
-            f'<div class="bias {bias_cls}">'
-            f'<span class="ico">{info["icon"]}</span>'
-            f"<span>Patrón de sesgo {bias_word} — la teoría lo vigila como posible "
-            f"giro <b>{bias_dir} de acá en adelante</b>.</span>"
-            f"</div>"
-            f'<div class="note">El sesgo se refiere a lo que el análisis técnico '
-            f"esperaría <i>después</i> del patrón, no al movimiento que ya ocurrió y "
-            f"forma el patrón en la imagen. Por sí solo no confirma nada y depende "
-            f"del contexto del gráfico.</div>"
-            f'<p class="pattern-text" style="margin-top:.8rem">'
-            f'{md_inline_to_html(info["summary"])}</p>'
-            f"</div>",
+            f'<div class="note" style="margin-bottom:.6rem">Se detectaron '
+            f"<b>{len(patterns)} patrones</b> en la imagen. Se explican todos a "
+            f"continuación, del más al menos confiable.</div>",
             unsafe_allow_html=True,
         )
-        with st.expander("Más sobre este patrón"):
-            st.markdown(info["detail"])
-    else:
-        st.markdown(
-            f'<div class="card pattern-text">Se detectó el patrón '
-            f'<b>{top["class_name"]}</b>.</div>',
-            unsafe_allow_html=True,
-        )
+
+    for class_name, score in patterns:
+        st.markdown(pattern_explain_html(class_name, score), unsafe_allow_html=True)
+        info = PATTERN_INFO.get(class_name)
+        if info:
+            with st.expander(f"Más sobre «{class_name}»"):
+                st.markdown(info["detail"])
+
+    st.markdown(
+        '<div class="note">El sesgo se refiere a lo que el análisis técnico '
+        "esperaría <i>después</i> del patrón, no al movimiento que ya ocurrió y "
+        "forma el patrón en la imagen. Por sí solo no confirma nada y depende "
+        "del contexto del gráfico.</div>",
+        unsafe_allow_html=True,
+    )
 else:
     st.warning(
         "No se reconoció ningún patrón con claridad en esta imagen. "
@@ -947,5 +1017,8 @@ with st.expander("🔧 Ver detalle técnico"):
     st.markdown("**Confianza por patrón**")
     st.caption("Score máximo detectado para cada uno de los 6 patrones.")
     st.markdown(class_scores_html(result["class_scores"]), unsafe_allow_html=True)
+
+# Limitaciones siempre visibles al pie del resultado.
+st.markdown(limitations_html(), unsafe_allow_html=True)
 
 st.markdown(render_footer(), unsafe_allow_html=True)

@@ -187,6 +187,13 @@ def load_model(device: str | None = None):
     model.load_state_dict(state_dict)
     model.to(device)
     model.eval()
+
+    # Desactivar el NMS interno del modelo (en runtime, sin tocar los pesos): el
+    # NMS de 0.3 borra cajas SOLAPADAS de distinta clase, dejando solo el patrón
+    # de mayor score aunque convivan varios. En su lugar aplicamos un NMS POR
+    # CLASE en predict(), para que patrones de clases distintas (p. ej. uno
+    # alcista y uno bajista) puedan coexistir, sin duplicar cajas de la misma clase.
+    model.roi_heads.nms_thresh = 1.0
     return model, device
 
 
@@ -233,6 +240,34 @@ def preprocess_image(img: Image.Image):
 # Inferencia + postprocesamiento
 # --------------------------------------------------------------------------- #
 
+# IoU para el NMS por clase (postproceso). Cajas de la MISMA clase que se
+# solapan más que esto se consideran duplicadas y se descarta la de menor score.
+# Es independiente del box_nms_thresh del modelo (que se desactiva en load_model).
+PER_CLASS_NMS_IOU = 0.3
+
+
+def _nms_per_class(boxes, labels, scores, iou_thresh: float = PER_CLASS_NMS_IOU):
+    """
+    Aplica NMS por separado dentro de cada clase y devuelve los índices a conservar.
+
+    A diferencia del NMS global del modelo (que suprime cajas solapadas SIN
+    importar la clase, dejando un solo patrón por zona), este NMS solo elimina
+    duplicados de la MISMA clase. Así, patrones de clases distintas que ocupan
+    la misma región de la imagen sobreviven todos.
+    """
+    import torchvision
+
+    keep_all = []
+    for cls in labels.unique():
+        idx = (labels == cls).nonzero(as_tuple=True)[0]
+        kept = torchvision.ops.nms(boxes[idx], scores[idx], iou_thresh)
+        keep_all.append(idx[kept])
+    if not keep_all:
+        return labels.new_empty((0,), dtype=torch.long)
+    # Reordenar por score descendente para mantener el orden esperado aguas abajo.
+    keep = torch.cat(keep_all)
+    return keep[scores[keep].argsort(descending=True)]
+
 @torch.no_grad()
 def predict(model, device, img: Image.Image, score_threshold: float = DEFAULT_SCORE_THRESHOLD):
     """
@@ -261,6 +296,13 @@ def predict(model, device, img: Image.Image, score_threshold: float = DEFAULT_SC
     boxes = output["boxes"].cpu()
     labels = output["labels"].cpu()
     scores = output["scores"].cpu()
+
+    # NMS POR CLASE: el modelo se carga con su NMS interno desactivado (ver
+    # load_model), así que acá descartamos cajas redundantes SOLO entre las de
+    # la misma clase. Esto deja que clases distintas que se solapan (varios
+    # patrones en la misma zona) sobrevivan, sin duplicar la misma clase.
+    keep = _nms_per_class(boxes, labels, scores, iou_thresh=PER_CLASS_NMS_IOU)
+    boxes, labels, scores = boxes[keep], labels[keep], scores[keep]
 
     detections = []
     for box, label, score in zip(boxes, labels, scores):

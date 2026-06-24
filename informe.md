@@ -243,8 +243,8 @@ confirmarlo.
 > **Estado:** etapa **cerrada**. La ronda final entrenó a **100 épocas** los dos
 > mejores candidatos —**Exp2: Faster R-CNN + Focal Loss** y **Exp4: RetinaNet +
 > Focal Loss**— y de su comparación salió el **modelo ganador: Faster R-CNN +
-> Focal Loss** (val mAP@0.5 0.7489 vs 0.7151; **test mAP@0.5 0.8650**). Ese modelo
-> es el que sirve la app. Las métricas finales están en §3.5.
+> Focal Loss**, con **val mAP@0.5 = 0.8111** y **test mAP@0.5 = 0.8650** (modelo
+> guardado). Ese modelo es el que sirve la app. Las métricas finales están en §3.5.
 
 El desarrollo experimental vive en
 [`dev/02_model_training.ipynb`](dev/02_model_training.ipynb) (v1),
@@ -365,10 +365,17 @@ definitiva.
 
 **Tabla comparativa (validación, 100 épocas):**
 
-| Experimento | Modelo | Balanceo | Épocas | Final Train Loss | Val mAP@0.5 |
+| Experimento | Modelo | Balanceo | Épocas | Final Train Loss | Val mAP@0.5 (última época) |
 |---|---|---|---|---|---|
-| **Exp 2 — FasterRCNN Focal** 🏆 | Faster R-CNN | Focal Loss | 100 | 0.0082 | **0.7489** |
+| **Exp 2 — FasterRCNN Focal** 🏆 | Faster R-CNN | Focal Loss | 100 | 0.0082 | 0.7489 |
 | Exp 4 — RetinaNet Focal | RetinaNet | Focal Loss | 100 | 0.0163 | 0.7151 |
+
+> **Aclaración sobre el checkpoint guardado:** el loop guarda el **mejor checkpoint por
+> mAP@0.5 de validación**, no el de la última época. Por eso el modelo final
+> (`dev/modelo.pth`) rinde **mejor** que el valor de la última época de la tabla: su
+> **val mAP@0.5 = 0.8111** (mAP@0.5:0.95 = 0.6824). Esa es la métrica del modelo que
+> realmente se despliega, y es coherente con el test de §3.5 (0.8650). La tabla muestra
+> el valor de la época 100 porque es lo que reporta el log automático del entrenamiento.
 
 > **Ajuste del scheduler (decisión justificada):** al pasar a 100 épocas, se cambió
 > el `StepLR` de `step_size=10` a `step_size=25` (con `gamma=0.5`). Con paso 10, a 100
